@@ -1,0 +1,85 @@
+#!/bin/bash
+
+# Dieses Skript soll Dateien mit gleichem Namen, aber anderer Zahl nach
+# gleichem Schema umbenennen
+
+while getopts "o:e:n:E:s:" opt
+do
+    case $opt in
+        o)
+            old_scheme="$OPTARG"
+            ;;
+        e)
+            old_ending="$OPTARG"
+            ;;
+        n)
+            new_scheme="$OPTARG"
+            ;;
+        E)
+            new_ending=$OPTARG
+            ;;
+        s)
+            i=$OPTARG
+            ;;
+    esac
+done
+
+if [ -z "$old_scheme" ] || [ -z "$old_ending" ] || [ -z "$new_scheme" ] || [ -z "$new_ending" ]
+then
+    echo $'Missing some parameters.\n\nCorrect usage of filename-edit:\n
+    filename-edit -o OLD_SCHEME -e OLD_ENDING -n NEW_SCHEME -E NEW_ENDING [-s START_COUNT]\n
+-s is optional'
+    exit 1
+fi
+
+if [ -z $i ]
+then
+    i=1
+fi
+
+total=i-1
+
+for file_old in $old_scheme*.$old_ending
+do
+    total=$(($total+1))
+done
+
+for file_old in $old_scheme*.$old_ending
+    do
+        if  (( total < 10))
+        then
+            j=$i
+        elif (( total < 100 ))
+        then
+            if [ $i -lt 10 ]
+            then
+                j=0$i
+            else
+                j=$i
+            fi
+        elif (( total < 1000 ))
+        then
+            if [ $i -lt 10 ]
+            then
+                j=00$i
+            elif [ $i -lt 100 ]
+            then
+                j=0$i
+            else
+                j=$i
+            fi
+        else
+            echo "Too many files."
+            exit 1
+        fi
+
+        mv "$file_old" "$new_scheme$j.$new_ending"
+        i=$(($i+1))
+
+        echo "Renamed $file_old into $new_scheme$j.$new_ending"
+
+        count=$(($count+1))
+    done
+
+    echo "Renamed $count files"
+
